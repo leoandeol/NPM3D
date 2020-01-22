@@ -108,6 +108,8 @@ def grid_subsampling_colors(points, colors, voxel_size):
     # YOUR CODE
     amin = np.amin(points,axis=0)
     amax = np.amax(points,axis=0)
+    print(amin)
+    print(amax)
     xmin,ymin,zmin = amin
     xmax,ymax,zmax = amax   
     
@@ -126,6 +128,7 @@ def grid_subsampling_colors(points, colors, voxel_size):
     
     subsampled_points = subsampled_points / points_count 
     subsampled_colors = subsampled_colors / points_count
+    print(subsampled_points.reshape((-1,3)).shape)
 
     return subsampled_points.reshape((-1,3)), subsampled_colors.reshape((-1,3))
 
