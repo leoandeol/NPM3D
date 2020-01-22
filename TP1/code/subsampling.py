@@ -90,15 +90,13 @@ def grid_subsampling(points, voxel_size):
         
         subsampled_points[x,y,z] += points[i]
 
-    for i in range(points.shape[0]):
-        x = points_idxs[i][0]
-        y = points_idxs[i][1]
-        z = points_idxs[i][2]
+    for i in range(subsampled_points.shape[0]):
+        for j in range(subsampled_points.shape[1]):
+            for k in range(subsampled_points.shape[2]):             
+                if(points_count[i,j,k] != 0):
+                    subsampled_points[i,j,k] = subsampled_points[i,j,k] / points_count[i,j,k]
 
-        if(points_count[x,y,z] != 0):
-            subsampled_points[x,y,z] = subsampled_points[x,y,z] / points_count[x,y,z]
-
-    points_count = points_count.astype(np.int64)
+    points_count = points_count.astype(np.int64)        
 
     return subsampled_points.reshape((-1,3))[points_count.reshape((-1))!=0]
 
@@ -108,29 +106,42 @@ def grid_subsampling_colors(points, colors, voxel_size):
     # YOUR CODE
     amin = np.amin(points,axis=0)
     amax = np.amax(points,axis=0)
-    print(amin)
-    print(amax)
-    xmin,ymin,zmin = amin
-    xmax,ymax,zmax = amax   
+    xmin = amin[0]
+    ymin = amin[1]
+    zmin = amin[2]
+    xmax = amax[0]
+    ymax = amax[1]
+    zmax = amax[2]
     
-    subsampled_points = np.zeros((int(np.ceil((xmax-xmin)/voxel_size)),int(np.ceil((ymax-ymin)/voxel_size)),int(np.ceil((zmax-zmin)/voxel_size),3)))
-    subsampled_colors = np.zeros((np.ceil((xmax-xmin)/voxel_size),np.ceil((ymax-ymin)/voxel_size),np.ceil((zmax-zmin)/voxel_size),3))
+    subsampled_points = np.zeros((np.ceil((xmax-xmin)/voxel_size).astype(np.int64),np.ceil((ymax-ymin)/voxel_size).astype(np.int64),np.ceil((zmax-zmin)/voxel_size).astype(np.int64),3))
+    subsampled_colors = np.zeros((np.ceil((xmax-xmin)/voxel_size).astype(np.int64),np.ceil((ymax-ymin)/voxel_size).astype(np.int64),np.ceil((zmax-zmin)/voxel_size).astype(np.int64),3))
     
-    points_count = np.zeros(subsampled_points.shape[:3])
+    points_count = np.zeros((np.ceil((xmax-xmin)/voxel_size).astype(np.int64),np.ceil((ymax-ymin)/voxel_size).astype(np.int64),np.ceil((zmax-zmin)/voxel_size).astype(np.int64),1))
     
-    points_idxs = (points-amin.reshape((1,3)))//voxel_size
-    
-    for i in range(points.shape[0]):
-        points_count[points_idxs[i]] += 1
-        
-        subsampled_points[points_idxs[i]] += points[i]
-        subsampled_colors[points_idxs[i]] += colors[i]
-    
-    subsampled_points = subsampled_points / points_count 
-    subsampled_colors = subsampled_colors / points_count
-    print(subsampled_points.reshape((-1,3)).shape)
+    points_idxs = ((points-amin.reshape((1,3)))//voxel_size).astype(np.int64)
 
-    return subsampled_points.reshape((-1,3)), subsampled_colors.reshape((-1,3))
+    for i in range(points.shape[0]):
+        x = points_idxs[i][0]
+        y = points_idxs[i][1]
+        z = points_idxs[i][2]
+        points_count[x,y,z] += 1
+        
+
+        subsampled_points[x,y,z] += points[i]
+        subsampled_colors[x,y,z] += points[i]
+
+    for i in range(subsampled_points.shape[0]):
+        for j in range(subsampled_points.shape[1]):
+            for k in range(subsampled_points.shape[2]):             
+                if(points_count[i,j,k] != 0):
+                    subsampled_points[i,j,k] = subsampled_points[i,j,k] / points_count[i,j,k]
+                    subsampled_colors[i,j,k] = subsampled_colors[i,j,k] / points_count[i,j,k]
+
+    points_count = points_count.astype(np.int64)        
+
+    return subsampled_points.reshape((-1,3))[points_count.reshape((-1))!=0],subsampled_colors.reshape((-1,3))[points_count.reshape((-1))!=0]
+
+
 
 
 # ------------------------------------------------------------------------------------------
@@ -191,7 +202,14 @@ if __name__ == '__main__':
     t1 = time.time()
     print('Subsampling done in {:.3f} seconds'.format(t1 - t0))
 
-    # Save
     write_ply('../grid_subsampled.ply', [subsampled_points], ['x', 'y', 'z'])
+
+    t0 = time.time()
+    subsampled__points, subsampled_colors = grid_subsampling_colors(points, colors, voxel_size)
+    t1 = time.time()
+    print('Colored subsampling done in {:.3f} seconds'.format(t1 - t0))
+
+    # Save
+    write_ply('../grid_subsampled_colors.ply', [subsampled_points,subsampled_colors], ['x', 'y', 'z', 'red', 'green', 'blue'])
     
     print('Done')
