@@ -89,10 +89,10 @@ def grid_subsampling(points, voxel_size):
         points_count[x,y,z] += 1
         
         subsampled_points[x,y,z] += points[i]
-    
-    subsampled_points = subsampled_points / points_count 
+        
+    subsampled_points[points_count.ravel()==0] = subsampled_points[points_count.ravel()==0] / points_count.ravel()[points_count==0] 
 
-    return subsampled_points.reshape((-1,3))
+    return subsampled_points.reshape((-1,3))[points_count.reshape((-1))]
 
 
 def grid_subsampling_colors(points, colors, voxel_size):
