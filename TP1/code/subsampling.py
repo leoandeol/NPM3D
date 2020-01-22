@@ -137,10 +137,9 @@ def grid_subsampling_colors(points, colors, voxel_size):
                     subsampled_points[i,j,k] = subsampled_points[i,j,k] / points_count[i,j,k]
                     subsampled_colors[i,j,k] = subsampled_colors[i,j,k] / points_count[i,j,k]
 
-    points_count = points_count.astype(np.int64)        
-
-    print(np.amin(subsampled_colors))
-    print(np.amax(subsampled_colors))
+    points_count = points_count.astype(np.int64)
+    subsampled_colors = subsampled_colors.astype(np.uint8)
+    
     return subsampled_points.reshape((-1,3))[points_count.reshape((-1))!=0],subsampled_colors.reshape((-1,3))[points_count.reshape((-1))!=0]
 
 
@@ -189,7 +188,7 @@ if __name__ == '__main__':
     print('decimation done in {:.3f} seconds'.format(t1 - t0))
 
     # Save
-    write_ply('../decimated.ply', [decimated_points, decimated_colors, decimated_labels], ['x', 'y', 'z', 'red', 'green', 'blue', 'label'])
+    write_ply('../results/decimated.ply', [decimated_points, decimated_colors, decimated_labels], ['x', 'y', 'z', 'red', 'green', 'blue', 'label'])
 
     # Subsample the point cloud on a grid
     # ***********************************
@@ -204,7 +203,7 @@ if __name__ == '__main__':
     t1 = time.time()
     print('Subsampling done in {:.3f} seconds'.format(t1 - t0))
 
-    write_ply('../grid_subsampled.ply', [subsampled_points], ['x', 'y', 'z'])
+    write_ply('../results/grid_subsampled.ply', [subsampled_points], ['x', 'y', 'z'])
 
     t0 = time.time()
     subsampled__points, subsampled_colors = grid_subsampling_colors(points, colors, voxel_size)
@@ -212,6 +211,6 @@ if __name__ == '__main__':
     print('Colored subsampling done in {:.3f} seconds'.format(t1 - t0))
 
     # Save
-    write_ply('../grid_subsampled_colors.ply', [subsampled_points,subsampled_colors], ['x', 'y', 'z', 'red', 'green', 'blue'])
+    write_ply('../results/grid_subsampled_colors.ply', [subsampled_points,subsampled_colors], ['x', 'y', 'z', 'red', 'green', 'blue'])
     
     print('Done')
