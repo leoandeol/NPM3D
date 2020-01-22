@@ -24,6 +24,7 @@
 
 # Import numpy package and name it "np"
 import numpy as np
+import matplotlib.pyplot as plt
 
 # Import functions from scikit-learn
 from sklearn.neighbors import KDTree
@@ -47,6 +48,7 @@ from tqdm import tqdm
 
 def brute_force_spherical(queries, supports, radius):
     # YOUR CODE
+
     neighborhoods = []
     for querie in tqdm(queries):
         neighborhood = []
@@ -161,25 +163,33 @@ if __name__ == '__main__':
         random_indices = np.random.choice(points.shape[0], num_queries, replace=False)
         queries = points[random_indices, :]
 
-        best_time = 100.0
-        opt_leaf_size = 1
-        for i in range(1,100):
-        #TREE
-            tree = KDTree(points, leaf_size=i)
+        if False:
+            best_time = 100.0
+            opt_leaf_size = 1
+            for i in range(1,100):
+                #TREE
+                tree = KDTree(points, leaf_size=i)
+                
+                # Search spherical
+                t0 = time.time()
+                neighborhoods = tree.query_radius(queries, r=radius) 
+                t1 = time.time()
+                timedif = t1-t0
+                if timedif < best_time:
+                    print("timing improved from {:.3f} to {:.3f}, opt leaf size is now {}".format(best_time,timedif,i))
+                    best_time = timedif
+                    opt_leaf_size = i
             
-            # Search spherical
+            # Print timing results
+            print('{:d} spherical neighborhoods with leaf size of {} computed in {:.3f} seconds'.format(num_queries,opt_leaf_size, best_time))
+
+        if True:
+            opt_leaf_size = 67
+            tree = KDTree(points, leaf_size=opt_leaf_size)
             t0 = time.time()
             neighborhoods = tree.query_radius(queries, r=radius) 
             t1 = time.time()
-            timedif = t1-t0
-            if timedif < best_time:
-                print("timing improved from {:.3f} to {:.3f}, opt leaf size is now {}".format(best_time,timedif,i))
-                best_time = timedif
-                opt_leaf_size = i
-        
-        # Print timing results
-        print('{:d} spherical neighborhoods with leaf size of {} computed in {:.3f} seconds'.format(num_queries,opt_leaf_size, best_time))
-
+            
         # Time to compute all neighborhoods in the cloud
         total_spherical_time = points.shape[0] * (t1 - t0) / num_queries
         print('Computing spherical neighborhoods with radius 20cm on whole cloud : {:.0f} seconds'.format(total_spherical_time))
@@ -187,11 +197,19 @@ if __name__ == '__main__':
         # Timings results on different radius with 1000 queries
 
         radius = [0.1, 0.2, 0.4, 0.6, 0.8, 1, 1.2, 1.4]
+        timings = []
         for rad in radius:
             random_indices = np.random.choice(points.shape[0], num_queries, replace=False)
             queries = points[random_indices, :]
             t2 = time.time()
             neighborhoods = tree.query_radius(queries, r=rad)
             t3 = time.time()
+            timings.append(t3-t2)
             
             print('{:d} spherical neighborhoods with radius {}cm computed in {:.3f} seconds'.format(num_queries,rad, t3 - t2))
+
+        plt.figure()
+        plt.plot(radius,timings)
+        plt.xlabel("radius")
+        plt.ylabel("timings")
+        plt.show()
