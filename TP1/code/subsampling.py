@@ -79,9 +79,9 @@ def grid_subsampling(points, voxel_size):
     points_idxs = (points-amin.reshape((1,3)))//voxel_size
     
     for i in range points.shape[0]:
-        points_count[points_idxs[i]] += 1
+        points_count[*points_idxs[i]] += 1
         
-        subsampled_points[points_idxs[i]] += points[i]
+        subsampled_points[*points_idxs[i]] += points[i]
     
     subsampled_points = subsampled_points / points_count 
 
