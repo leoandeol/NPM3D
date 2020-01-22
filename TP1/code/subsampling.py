@@ -77,17 +77,18 @@ def grid_subsampling(points, voxel_size):
     zmax = amax[2]
     
     subsampled_points = np.zeros((np.ceil((xmax-xmin)/voxel_size).astype(np.int64),np.ceil((ymax-ymin)/voxel_size).astype(np.int64),np.ceil((zmax-zmin)/voxel_size).astype(np.int64),3))
-
+    
     points_count = np.zeros((np.ceil((xmax-xmin)/voxel_size).astype(np.int64),np.ceil((ymax-ymin)/voxel_size).astype(np.int64),np.ceil((zmax-zmin)/voxel_size).astype(np.int64),1))
     
     points_idxs = ((points-amin.reshape((1,3)))//voxel_size).astype(np.int64)
 
-    print(points_idxs.shape)
-
     for i in range(points.shape[0]):
-        points_count[*points_idxs[i]] += 1
+        x = points_idxs[i][0]
+        y = points_idxs[i][1]
+        z = points_idxs[i][2]
+        points_count[x,y,z] += 1
         
-        subsampled_points[*points_idxs[i]] += points[i]
+        subsampled_points[x,y,z] += points[i]
     
     subsampled_points = subsampled_points / points_count 
 
