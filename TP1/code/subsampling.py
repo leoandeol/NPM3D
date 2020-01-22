@@ -46,11 +46,12 @@ import time
 
 
 def cloud_decimation(points, colors, labels, factor):
+    
 
     # YOUR CODE
-    decimated_points = None
-    decimated_colors = None
-    decimated_labels = None
+    decimated_points = points[::factor]
+    decimated_colors = colors[::factor]
+    decimated_labels = labels[::factor]
 
     return decimated_points, decimated_colors, decimated_labels
 
@@ -66,10 +67,25 @@ def grid_subsampling(points, voxel_size):
     #
 
     # YOUR CODE
+    amin = np.amin(points,axis=0)
+    amax = np.amax(points,axis=0)
+    xmin,ymin,zmin = amin
+    xmax,ymax,zmax = amax   
+    
+    subsampled_points = np.zeros((np.ceil((xmax-xmin)/voxel_size),np.ceil((ymax-ymin)/voxel_size),np.ceil((zmax-zmin)/voxel_size),3))
+    
+    points_count = np.zeros(subsampled_points.shape[:3])
+    
+    points_idxs = (points-amin.reshape((1,3)))//voxel_size
+    
+    for i in range points.shape[0]:
+        points_count[points_idxs[i]] += 1
+        
+        subsampled_points[points_idxs[i]] += points[i]
+    
+    subsampled_points = subsampled_points / points_count 
 
-    subsampled_points = None
-
-    return subsampled_points
+    return subsampled_points.reshape((-1,3))
 
 
 def grid_subsampling_colors(points, colors, voxel_size):
