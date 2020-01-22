@@ -126,6 +126,7 @@ def grid_subsampling_colors(points, colors, voxel_size):
         z = points_idxs[i][2]
         points_count[x,y,z] += 1
         
+
         subsampled_points[x,y,z] += points[i]
         subsampled_colors[x,y,z] += colors[i]
 
