@@ -49,7 +49,7 @@ def RMS(X, Y):
     '''
     Computes the root mean square error between two point sets X and Y
     '''
-    return np.sqrt((np.norm(X-Y,axis=0)**2)/X.shape[1])
+    return np.sqrt(np.sum(np.linalg.norm(X-Y,axis=0)**2)/X.shape[1])
 
 
 def best_rigid_transform(data, ref):
@@ -110,20 +110,22 @@ def icp_point_to_point(data, ref, max_iter, RMS_threshold):
     T_list = []
     neighbors_list = []
     rms_list = [np.inf]
+    tree = KDTree(ref.T,leaf_size=10)
     
     k = 0
-    while k<max_iter and rms_list[-1] > RMS_treshold:
-        tree = KDTree(ref,leaf_size=63)
-        neighbors = tree.query(data)
+    while k<max_iter and rms_list[-1] > RMS_threshold:
+        _,neighbors = tree.query(data_aligned.T)
+        neighbors = neighbors.ravel()
         #todo matching
-        R,T = best_rigid_transform(data[:,neighbors], ref)
+        R,T = best_rigid_transform(data, ref[:,neighbors])
+        data_aligned = R@data + T
         
         neighbors_list.append(neighbors)
         R_list.append(R)
         T_list.append(T)
-        rms_list.append(RMS(ref,R@data[:,neighbors]+T))
+        rms_list.append(RMS(ref[:,neighbors],data_aligned))
+        k+=1
         
-    data_aligned = R@data + T
     return data_aligned, R_list, T_list, neighbors_list, rms_list[1:]
 
 
@@ -175,19 +177,25 @@ if __name__ == '__main__':
         data2D_path = '../data/data2D.ply'
 
         # Load clouds
-        ref2D_cloud = read_ply(red2D_path)
+        ref2D_cloud = read_ply(ref2D_path)
         data2D_cloud = read_ply(data2D_path)
 
-        print(ref2D_cloud.shape)
+        ref2D_cloud = np.asarray([np.asarray(list(x)) for x in ref2D_cloud]).T
+        data2D_cloud = np.asarray([np.asarray(list(x)) for x in data2D_cloud]).T
 
         # Apply ICP
-        data_aligned, R_list, T_list, neighbors_list = icp_point_to_point(data2D_cloud
+        data_aligned, R_list, T_list, neighbors_list, rms_list = icp_point_to_point(data2D_cloud,
                                                                           ref2D_cloud,
-                                                                          1000,
+                                                                          15,
                                                                           1e-7)
         
         # Show ICP
-        show_ICP(data_aligned, R_list, T_list, neighbors_list)
+        show_ICP(data2D_cloud, ref2D_cloud, R_list, T_list, neighbors_list)
+
+        plt.plot(rms_list)
+        plt.xlabel('iteration')
+        plt.ylabel('RMSE')
+        plt.show()
 
     # If statement to skip this part if wanted
     if False:
@@ -201,7 +209,7 @@ if __name__ == '__main__':
         bunny_p_cloud = read_ply(bunny_p_path)
 
         # Apply ICP
-        data_aligned, R_list, T_list, neighbors_list = icp_point_to_point(bunny_p_cloud,
+        data_aligned, R_list, T_list, neighbors_list, rms_list = icp_point_to_point(bunny_p_cloud,
                                                                           bunny_o_cloud,
                                                                           1000,
                                                                           1e-7)
