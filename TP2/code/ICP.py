@@ -113,13 +113,15 @@ def icp_point_to_point(data, ref, max_iter, RMS_threshold):
     
     k = 0
     while k<max_iter and rms_list[-1] > RMS_treshold:
-        tree = KDTree(,leaf_size=63)
+        tree = KDTree(ref,leaf_size=63)
+        neighbors = tree.query(data)
         #todo matching
-        R,T = best_rigid_transform(data, ref)
+        R,T = best_rigid_transform(data[:,neighbors], ref)
         
+        neighbors_list.append(neighbors)
         R_list.append(R)
         T_list.append(T)
-        rms_list.append(RMS(ref,R@data+T))
+        rms_list.append(RMS(ref,R@data[:,neighbors]+T))
         
     data_aligned = R@data + T
     return data_aligned, R_list, T_list, neighbors_list, rms_list[1:]
