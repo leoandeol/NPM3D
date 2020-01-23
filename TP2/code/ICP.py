@@ -166,17 +166,26 @@ if __name__ == '__main__':
     #
 
     # If statement to skip this part if wanted
-    if False:
+    if True:
 
         # Cloud paths
         ref2D_path = '../data/ref2D.ply'
         data2D_path = '../data/data2D.ply'
 
         # Load clouds
+        ref2D_cloud = read_ply(red2D_path)
+        data2D_cloud = read_ply(data2D_path)
+
+        print(ref2D_cloud.shape)
 
         # Apply ICP
-
+        data_aligned, R_list, T_list, neighbors_list = icp_point_to_point(data2D_cloud
+                                                                          ref2D_cloud,
+                                                                          1000,
+                                                                          1e-7)
+        
         # Show ICP
+        show_ICP(data_aligned, R_list, T_list, neighbors_list)
 
     # If statement to skip this part if wanted
     if False:
@@ -196,7 +205,7 @@ if __name__ == '__main__':
                                                                           1e-7)
         
         # Show ICP
-        
+        show_ICP(data_aligned, R_list, T_list, neighbors_list)
 
     # Fast ICP
     # ********
@@ -210,6 +219,8 @@ if __name__ == '__main__':
         NDDC_2_path = '../data/Notre_Dame_Des_Champs_2.ply'
 
         # Load clouds
+        NDDC_1_cloud = read_ply(NDDC_1_path)
+        NDDC_2_cloud = read_ply(NDDC_2_path)
 
         # Apply fast ICP for different values of the sampling_limit parameter
 
