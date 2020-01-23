@@ -157,11 +157,17 @@ if __name__ == '__main__':
         bunny_p_path = '../data/bunny_perturbed.ply'
 
         # Load clouds
+        bunny_o_cloud = read_ply(bunny_o_path)
+        bunny_p_cloud = read_ply(bunny_p_path)
 
         # Apply ICP
-
+        data_aligned, R_list, T_list, neighbors_list = icp_point_to_point(bunny_p_cloud,
+                                                                          bunny_o_cloud,
+                                                                          1000,
+                                                                          1e-7)
+        
         # Show ICP
-
+        
 
     # Fast ICP
     # ********
