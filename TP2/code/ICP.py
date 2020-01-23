@@ -170,7 +170,7 @@ if __name__ == '__main__':
     #
 
     # If statement to skip this part if wanted
-    if True:
+    if False:
 
         # Cloud paths
         ref2D_path = '../data/ref2D.ply'
@@ -198,7 +198,7 @@ if __name__ == '__main__':
         plt.show()
 
     # If statement to skip this part if wanted
-    if False:
+    if True:
 
         # Cloud paths
         bunny_o_path = '../data/bunny_original.ply'
@@ -208,14 +208,17 @@ if __name__ == '__main__':
         bunny_o_cloud = read_ply(bunny_o_path)
         bunny_p_cloud = read_ply(bunny_p_path)
 
+        bunny_o_cloud = np.asarray([np.asarray(list(x)) for x in bunny_o_cloud]).T
+        bunny_p_cloud = np.asarray([np.asarray(list(x)) for x in bunny_p_cloud]).T
+
         # Apply ICP
         data_aligned, R_list, T_list, neighbors_list, rms_list = icp_point_to_point(bunny_p_cloud,
                                                                           bunny_o_cloud,
-                                                                          1000,
+                                                                          50,
                                                                           1e-7)
         
         # Show ICP
-        show_ICP(data_aligned, R_list, T_list, neighbors_list)
+        show_ICP(bunny_p_cloud, bunny_o_cloud, R_list, T_list, neighbors_list)
 
     # Fast ICP
     # ********
