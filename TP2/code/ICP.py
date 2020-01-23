@@ -218,8 +218,12 @@ if __name__ == '__main__':
                                                                           1e-7)
         
         # Show ICP
-        show_ICP(bunny_p_cloud, bunny_o_cloud, R_list, T_list, neighbors_list)
+        plt.plot(rms_list)
+        plt.xlabel('iteration')
+        plt.ylabel('RMSE')
+        plt.show()
 
+        show_ICP(bunny_p_cloud, bunny_o_cloud, R_list, T_list, neighbors_list)
     # Fast ICP
     # ********
     #
