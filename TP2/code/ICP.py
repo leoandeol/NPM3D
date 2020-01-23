@@ -45,6 +45,12 @@ from utils.visu import show_ICP
 #   Here you can define usefull functions to be used in the main
 #
 
+def RMS(X, Y):
+    '''
+    Computes the root mean square error between two point sets X and Y
+    '''
+    return np.sqrt((np.norm(X-Y,axis=0)**2)/X.shape[1])
+
 
 def best_rigid_transform(data, ref):
     '''
@@ -59,8 +65,21 @@ def best_rigid_transform(data, ref):
     '''
 
     # YOUR CODE
-    R = np.eye(data.shape[0])
-    T = np.zeros(data.shape[0])
+    
+    Pm = np.mean(ref,axis=1).reshape((-1,1))
+    Pmp = np.mean(data,axis=1).reshape((-1,1))
+    
+    
+    Q = ref - Pm
+    Qp = data - Pmp
+    
+    H = Qp @ Q.T
+    
+    U,S,Vt = np.linalg.svd(H)
+    
+    R = Vt.T @ U.T
+    
+    T = Pm - R@Pmp
 
     return R, T
 
@@ -90,10 +109,20 @@ def icp_point_to_point(data, ref, max_iter, RMS_threshold):
     R_list = []
     T_list = []
     neighbors_list = []
-
-    # YOUR CODE
-
-    return data_aligned, R_list, T_list, neighbors_list
+    rms_list = [np.inf]
+    
+    k = 0
+    while k<max_iter and rms_list[-1] > RMS_treshold:
+        tree = KDTree(,leaf_size=63)
+        #todo matching
+        R,T = best_rigid_transform(data, ref)
+        
+        R_list.append(R)
+        T_list.append(T)
+        rms_list.append(RMS(ref,R@data+T))
+        
+    data_aligned = R@data + T
+    return data_aligned, R_list, T_list, neighbors_list, rms_list[1:]
 
 
 #------------------------------------------------------------------------------------------
