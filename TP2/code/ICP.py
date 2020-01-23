@@ -59,8 +59,21 @@ def best_rigid_transform(data, ref):
     '''
 
     # YOUR CODE
-    R = np.eye(data.shape[0])
-    T = np.zeros(data.shape[0])
+    
+    Pm = np.mean(ref,axis=1).reshape((-1,1))
+    Pmp = np.mean(data,axis=1).reshape((-1,1))
+    
+    
+    Q = ref - Pm
+    Qp = data - Pmp
+    
+    H = Qp @ Q.T
+    
+    U,S,Vt = np.linalg.svd(H)
+    
+    R = Vt.T @ U.T
+    
+    T = Pm - R@Pmp
 
     return R, T
 
