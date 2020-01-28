@@ -129,6 +129,52 @@ def icp_point_to_point(data, ref, max_iter, RMS_threshold):
     return data_aligned, R_list, T_list, neighbors_list, rms_list[1:]
 
 
+def icp_point_to_point_stochastic(data, ref, max_iter, RMS_threshold, sampling_limit):
+    '''
+    Iterative closest point algorithm with a point to point strategy.
+    Inputs :
+        data = (d x N_data) matrix where "N_data" is the number of points and "d" the dimension
+        ref = (d x N_ref) matrix where "N_ref" is the number of points and "d" the dimension
+        max_iter = stop condition on the number of iterations
+        RMS_threshold = stop condition on the distance
+    Returns :
+        data_aligned = data aligned on reference cloud
+        R_list = list of the (d x d) rotation matrices found at each iteration
+        T_list = list of the (d x 1) translation vectors found at each iteration
+        neighbors_list = At each iteration, you search the nearest neighbors of each data point in
+        the ref cloud and this obtain a (1 x N_data) array of indices. This is the list of those
+        arrays at each iteration
+           
+    '''
+
+    # Variable for aligned data
+    data_aligned = np.copy(data)
+
+    # Initiate lists
+    R_list = []
+    T_list = []
+    neighbors_list = []
+    rms_list = [np.inf]
+    tree = KDTree(ref.T,leaf_size=10)
+    
+    k = 0
+    while k<max_iter and rms_list[-1] > RMS_threshold:
+	sampled_idxs = np.random.choice(data.shape[1])
+        _,neighbors = tree.query(data_aligned_sampled[:,sampled_idxs].T)
+        neighbors = neighbors.ravel()
+        #todo matching
+        R,T = best_rigid_transform(data[:,sampled_idxs], ref[:,neighbors])
+        data_aligned = R@data + T
+        
+        neighbors_list.append(neighbors)
+        R_list.append(R)
+        T_list.append(T)
+        rms_list.append(RMS(ref[:,neighbors],data_aligned[:,sampled_idxs))
+        k+=1
+        
+    return data_aligned, R_list, T_list, neighbors_list, rms_list[1:]
+
+
 #------------------------------------------------------------------------------------------
 #
 #           Main
