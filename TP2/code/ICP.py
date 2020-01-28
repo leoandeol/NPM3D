@@ -146,24 +146,35 @@ if __name__ == '__main__':
     #
 
     # If statement to skip this part if wanted
-    if False:
+    if True:
 
         # Cloud paths
         bunny_o_path = '../data/bunny_original.ply'
         bunny_r_path = '../data/bunny_returned.ply'
 
         # Load clouds
+        bunny_o_cloud = read_ply(bunny_o_path)
+        bunny_r_cloud = read_ply(bunny_r_path)
+
+        bunny_o_cloud = np.asarray([np.asarray(list(x)) for x in bunny_o_cloud]).T
+        bunny_r_cloud = np.asarray([np.asarray(list(x)) for x in bunny_r_cloud]).T
 
         # Find the best transformation
-
+        R,T = best_rigid_transform(bunny_r_cloud, bunny_o_cloud) 
+        
         # Apply the tranformation
+        bunny_r_cloud = R@bunny_r_cloud + T        
 
-        # Save cloud
+        # Save cloud        
+        bunny_o_cloud = np.asarray([np.asarray(list(x)) for x in bunny_o_cloud]).T
+        bunny_r_cloud = np.asarray([np.asarray(list(x)) for x in bunny_r_cloud]).T
+        write_ply('../results/bunny_returned_bestRT.ply',[bunny_r_cloud],['x','y','z'])
 
         # Compute RMS
+        rms = RMS(bunny_o_cloud,bunny_r_cloud)
 
         # Print RMS
-   
+        print(rms)   
 
     # Test ICP and visualize
     # **********************
@@ -198,7 +209,7 @@ if __name__ == '__main__':
         plt.show()
 
     # If statement to skip this part if wanted
-    if True:
+    if False:
 
         # Cloud paths
         bunny_o_path = '../data/bunny_original.ply'
