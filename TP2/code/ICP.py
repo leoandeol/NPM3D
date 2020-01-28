@@ -159,8 +159,8 @@ def icp_point_to_point_stochastic(data, ref, max_iter, RMS_threshold, sampling_l
     
     k = 0
     while k<max_iter and rms_list[-1] > RMS_threshold:
-	sampled_idxs = np.random.choice(data.shape[1])
-        _,neighbors = tree.query(data_aligned_sampled[:,sampled_idxs].T)
+        sampled_idxs = np.random.choice(data.shape[1],sampling_limit,replace=False)
+        _,neighbors = tree.query(data_aligned[:,sampled_idxs].T)
         neighbors = neighbors.ravel()
         #todo matching
         R,T = best_rigid_transform(data[:,sampled_idxs], ref[:,neighbors])
@@ -169,30 +169,30 @@ def icp_point_to_point_stochastic(data, ref, max_iter, RMS_threshold, sampling_l
         neighbors_list.append(neighbors)
         R_list.append(R)
         T_list.append(T)
-        rms_list.append(RMS(ref[:,neighbors],data_aligned[:,sampled_idxs))
+        rms_list.append(RMS(ref[:,neighbors],data_aligned[:,sampled_idxs]))
         k+=1
-        
+                        
     return data_aligned, R_list, T_list, neighbors_list, rms_list[1:]
 
 
 #------------------------------------------------------------------------------------------
-#
-#           Main
-#       \**********/
-#
-#
-#   Here you can define the instructions that are called when you execute this file
-#
+                        #
+                        #           Main
+                        #       \**********/
+                        #
+                        #
+                        #   Here you can define the instructions that are called when you execute this file
+                        #
 
 
 if __name__ == '__main__':
-   
+                        
     # Transformation estimation
-    # *************************
-    #
+                        # *************************
+                        #
 
     # If statement to skip this part if wanted
-    if True:
+    if False:
 
         # Cloud paths
         bunny_o_path = '../data/bunny_original.ply'
@@ -207,7 +207,7 @@ if __name__ == '__main__':
 
         # Find the best transformation
         R,T = best_rigid_transform(bunny_r_cloud, bunny_o_cloud) 
-        
+                        
         # Apply the tranformation
         bunny_r_cloud = R@bunny_r_cloud + T        
 
@@ -223,8 +223,8 @@ if __name__ == '__main__':
         print(rms)   
 
     # Test ICP and visualize
-    # **********************
-    #
+                        # **********************
+                        #
 
     # If statement to skip this part if wanted
     if False:
@@ -242,10 +242,10 @@ if __name__ == '__main__':
 
         # Apply ICP
         data_aligned, R_list, T_list, neighbors_list, rms_list = icp_point_to_point(data2D_cloud,
-                                                                          ref2D_cloud,
-                                                                          15,
-                                                                          1e-7)
-        
+                                                                                    ref2D_cloud,
+                                                                                    15,
+                                                                                    1e-7)
+                        
         # Show ICP
         show_ICP(data2D_cloud, ref2D_cloud, R_list, T_list, neighbors_list)
 
@@ -270,10 +270,10 @@ if __name__ == '__main__':
 
         # Apply ICP
         data_aligned, R_list, T_list, neighbors_list, rms_list = icp_point_to_point(bunny_p_cloud,
-                                                                          bunny_o_cloud,
-                                                                          50,
-                                                                          1e-7)
-        
+                                                                                    bunny_o_cloud,
+                                                                                    50,
+                                                                                    1e-7)
+                        
         # Show ICP
         plt.plot(rms_list)
         plt.xlabel('iteration')
@@ -281,12 +281,12 @@ if __name__ == '__main__':
         plt.show()
 
         show_ICP(bunny_p_cloud, bunny_o_cloud, R_list, T_list, neighbors_list)
-    # Fast ICP
-    # ********
-    #
+                        # Fast ICP
+                        # ********
+                        #
 
     # If statement to skip this part if wanted
-    if False:
+    if True:
 
         # Cloud paths
         NDDC_1_path = '../data/Notre_Dame_Des_Champs_1.ply'
@@ -296,9 +296,25 @@ if __name__ == '__main__':
         NDDC_1_cloud = read_ply(NDDC_1_path)
         NDDC_2_cloud = read_ply(NDDC_2_path)
 
+        NDDC_1_cloud = np.asarray([np.asarray(list(x)) for x in NDDC_1_cloud]).T
+        NDDC_2_cloud = np.asarray([np.asarray(list(x)) for x in NDDC_2_cloud]).T
+                        
         # Apply fast ICP for different values of the sampling_limit parameter
+        data_aligned, R_list, T_list, neighbors_list, rms_list = icp_point_to_point_stochastic(NDDC_2_cloud, NDDC_1_cloud, 1000, 1e-7, 1000)
 
+        data_aligned1, R_list1, T_list1, neighbors_list1, rms_list1 = icp_point_to_point_stochastic(NDDC_2_cloud, NDDC_1_cloud, 1000, 1e-7, 10000)
+
+        data_aligned2, R_list2, T_list2, neighbors_list2, rms_list2 = icp_point_to_point_stochastic(NDDC_2_cloud, NDDC_1_cloud, 1000, 1e-7, 50000)
+                        
         # Plot RMS
-        #
-        # => To plot something in python use the function plt.plot() to create the figure and 
-        #    then plt.show() to display it
+                        #
+                        # => To plot something in python use the function plt.plot() to create the figure and 
+                        #    then plt.show() to display it
+
+        plt.plot(rms_list, label="1000 points")
+        plt.plot(rms_list1, label="10 000 points")
+        plt.plot(rms_list2, label="50 000 points")
+        plt.xlabel('iteration')
+        plt.ylabel('RMSE')
+        plt.legend()
+        plt.show()
