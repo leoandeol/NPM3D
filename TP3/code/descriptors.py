@@ -48,10 +48,10 @@ import time
 #
 
 def local_PCA(points):
-    assert points.shape[0] in [2,3]
+    assert points.shape[1] in [2,3]
 
-    bary = np.mean(points,axis=1).reshape((-1,1))
-    cov = (points-bary)(points-bary).T/points.shape[1]
+    bary = np.mean(points,axis=0).reshape((1,-1))
+    cov = (points-bary).T@(points-bary)/points.shape[1]
 
     eigenvalues, eigenvectors = np.linalg.eigh(cov)
 
@@ -61,6 +61,9 @@ def local_PCA(points):
 def neighborhood_PCA(query_points, cloud_points, radius):
 
     # This function needs to compute PCA on the neighborhoods of all query_points in cloud_points
+    
+    for i,point in enumerate(query_points):
+    
 
     all_eigenvalues = np.zeros((query_points.shape[0], 3))
     all_eigenvectors = np.zeros((query_points.shape[0], 3, 3))
