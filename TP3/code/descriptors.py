@@ -63,6 +63,13 @@ def neighborhood_PCA(query_points, cloud_points, radius):
     # This function needs to compute PCA on the neighborhoods of all query_points in cloud_points
     
     for i,point in enumerate(query_points):
+        point = point.reshape((1,-1))
+        diff = cloud_points - point
+        norm_diff = np.linalg.norm(diff,1)
+        pca_points = cloud_points[norm_diff<radius]
+        eigvals, eigvecs = local_PCA(pca_points)
+        all_eigenvalues[i] = eigvals
+        all_eigenvectors[i] = eigvecs
     
 
     all_eigenvalues = np.zeros((query_points.shape[0], 3))
