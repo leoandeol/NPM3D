@@ -48,9 +48,12 @@ import time
 #
 
 def local_PCA(points):
+    assert points.shape[0] in [2,3]
 
-    eigenvalues = None
-    eigenvectors = None
+    bary = np.mean(points,axis=1).reshape((-1,1))
+    cov = (points-bary)(points-bary).T/points.shape[1]
+
+    eigenvalues, eigenvectors = np.linalg.eigh(cov)
 
     return eigenvalues, eigenvectors
 
