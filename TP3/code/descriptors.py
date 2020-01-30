@@ -51,7 +51,7 @@ def local_PCA(points):
     assert points.shape[1] in [2,3]
     
     bary = np.mean(points,axis=0).reshape((1,-1))
-    cov = (points-bary).T@(points-bary)/points.shape[1]
+    cov = (points-bary).T@(points-bary)/points.shape[0]
 
     eigenvalues, eigenvectors = np.linalg.eigh(cov)
 
@@ -105,7 +105,7 @@ if __name__ == '__main__':
     # ****************
     #
 
-    if True:
+    if False:
 
         # Load cloud as a [N x 3] matrix
         cloud_path = '../data/Lille_street_small.ply'
@@ -129,14 +129,15 @@ if __name__ == '__main__':
     # ******************
     #
 
-    if False:
+    if True:
 
         # Load cloud as a [N x 3] matrix
         cloud_path = '../data/Lille_street_small.ply'
         cloud_ply = read_ply(cloud_path)
         cloud = np.vstack((cloud_ply['x'], cloud_ply['y'], cloud_ply['z'])).T
 
-        # YOUR CODE
+        # YOUR CODE        
+        eigenvalues, eigenvectors = neighborhoord_PCA(cloud)
 
     # Features computation
     # ********************
