@@ -81,6 +81,7 @@ def neighborhood_PCA(query_points, cloud_points, radius):
 def compute_features(query_points, cloud_points, radius):
 
     # Compute the features for all query points in the cloud
+    eigvals, eigves = neighborhood_PCA(query_points, cloud_points, radius)
 
     verticality = np.zeros((query_points.shape[0]))
     linearity = np.zeros((query_points.shape[0]))
