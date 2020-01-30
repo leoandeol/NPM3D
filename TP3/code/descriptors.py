@@ -49,7 +49,7 @@ import time
 
 def local_PCA(points):
     assert points.shape[1] in [2,3]
-
+    
     bary = np.mean(points,axis=0).reshape((1,-1))
     cov = (points-bary).T@(points-bary)/points.shape[1]
 
@@ -105,7 +105,7 @@ if __name__ == '__main__':
     # ****************
     #
 
-    if False:
+    if True:
 
         # Load cloud as a [N x 3] matrix
         cloud_path = '../data/Lille_street_small.ply'
