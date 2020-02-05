@@ -59,7 +59,7 @@ def local_PCA(points):
 
 
 def neighborhood_PCA(query_points, cloud_points, radius):
-
+    
     # This function needs to compute PCA on the neighborhoods of all query_points in cloud_points
     
     for i,point in enumerate(query_points):
@@ -136,9 +136,11 @@ if __name__ == '__main__':
         cloud_path = '../data/Lille_street_small.ply'
         cloud_ply = read_ply(cloud_path)
         cloud = np.vstack((cloud_ply['x'], cloud_ply['y'], cloud_ply['z'])).T
+        print(cloud.shape)
+        print(cloud[0].shape)
 
         # YOUR CODE        
-        eigenvalues, eigenvectors = neighborhoord_PCA(cloud)
+        eigenvalues, eigenvectors = neighborhood_PCA(cloud[0],cloud,20)
 
     # Features computation
     # ********************
