@@ -72,8 +72,6 @@ def neighborhood_PCA(query_points, cloud_points, radius):
         eigvals, eigvecs = local_PCA(pca_points)
         all_eigenvalues[i] = eigvals
         all_eigenvectors[i] = eigvecs
-    
-
 
     return all_eigenvalues, all_eigenvectors
 
@@ -83,10 +81,15 @@ def compute_features(query_points, cloud_points, radius):
     # Compute the features for all query points in the cloud
     eigvals, eigves = neighborhood_PCA(query_points, cloud_points, radius)
 
-    verticality = np.zeros((query_points.shape[0]))
-    linearity = np.zeros((query_points.shape[0]))
-    planarity = np.zeros((query_points.shape[0]))
-    sphericity = np.zeros((query_points.shape[0]))
+    lbd3, lbd2, lbd1 = eigvals[:,0], eigvals[:,1], eigvals[:,2]
+    lbd1 = lbd1 + 1e-7
+    normals = eigves[:,0,:]
+    vert_unit = np.array([[0,0,1]])
+
+    verticality = 2*np.arcsin(np.abs(normals@vert_unit))/np.pi
+    linearity = -1*(lbd2/lbd1) + 1
+    planarity = (lbd2 - lbd3) / lbd1
+    sphericity = lbd3 / lbd1
 
     return verticality, linearity, planarity, sphericity
 
@@ -149,11 +152,17 @@ if __name__ == '__main__':
     # ********************
     #
 
-    if False:
+    if True:
 
         # Load cloud as a [N x 3] matrix
         cloud_path = '../data/Lille_street_small.ply'
         cloud_ply = read_ply(cloud_path)
         cloud = np.vstack((cloud_ply['x'], cloud_ply['y'], cloud_ply['z'])).T
+        query = cloud[:,:]
+        np.random.shuffle(query)
+        query = query[:200,:]
+        print(cloud.shape)
+        print(query.shape)
 
-        # YOUR CODE
+        # YOUR CODE        
+        eigenvalues, eigenvectors = compute_features(query,cloud,20)
