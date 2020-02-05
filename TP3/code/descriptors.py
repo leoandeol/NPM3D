@@ -136,11 +136,9 @@ if __name__ == '__main__':
         cloud_path = '../data/Lille_street_small.ply'
         cloud_ply = read_ply(cloud_path)
         cloud = np.vstack((cloud_ply['x'], cloud_ply['y'], cloud_ply['z'])).T
-        print(cloud.shape)
-        print(cloud[0].shape)
-
+        
         # YOUR CODE        
-        eigenvalues, eigenvectors = neighborhood_PCA(cloud[0],cloud,20)
+        eigenvalues, eigenvectors = neighborhood_PCA(cloud,cloud,2)
 
     # Features computation
     # ********************
