@@ -37,6 +37,7 @@ from utils.ply import write_ply, read_ply
 # Import time package
 import time
 
+from tqdm import tqdm
 
 # ------------------------------------------------------------------------------------------
 #
@@ -64,7 +65,7 @@ def neighborhood_PCA(query_points, cloud_points, radius):
     all_eigenvalues = np.zeros((query_points.shape[0], 3))
     all_eigenvectors = np.zeros((query_points.shape[0], 3, 3))
     
-    for i,point in enumerate(query_points):
+    for i,point in enumerate(tqdm(query_points)):
         point = point.reshape((1,-1))
         diff = cloud_points - point
         norm_diff = np.linalg.norm(diff,axis=1)
@@ -138,13 +139,14 @@ if __name__ == '__main__':
         cloud = np.vstack((cloud_ply['x'], cloud_ply['y'], cloud_ply['z'])).T
 
         query = cloud[:,:]
-        np.random.shuffle(query)
-        query = query[:200,:]
-        print(cloud.shape)
-        print(query.shape)
+        
+        #np.random.shuffle(query)
+        #query = query[:2000,:]
 
         # YOUR CODE        
-        eigenvalues, eigenvectors = neighborhood_PCA(query,cloud,20)
+        eigenvalues, eigenvectors = neighborhood_PCA(query,cloud,5)
+        normals = eigenvectors[:,0,:]
+        write_ply('../results/normals.ply', [query,normals], ['x', 'y', 'z', 'nx', 'ny', 'nz'])
 
     # Features computation
     # ********************
