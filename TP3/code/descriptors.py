@@ -131,7 +131,7 @@ if __name__ == '__main__':
     # ******************
     #
 
-    if True:
+    if False:
 
         # Load cloud as a [N x 3] matrix
         cloud_path = '../data/Lille_street_small.ply'
@@ -144,7 +144,7 @@ if __name__ == '__main__':
         #query = query[:2000,:]
 
         # YOUR CODE        
-        eigenvalues, eigenvectors = neighborhood_PCA(query,cloud,5)
+        eigenvalues, eigenvectors = neighborhood_PCA(query,cloud,1)
         normals = eigenvectors[:,0,:]
         write_ply('../results/normals.ply', [query,normals], ['x', 'y', 'z', 'nx', 'ny', 'nz'])
 
@@ -152,11 +152,14 @@ if __name__ == '__main__':
     # ********************
     #
 
-    if False:
+    if True:
 
         # Load cloud as a [N x 3] matrix
         cloud_path = '../data/Lille_street_small.ply'
         cloud_ply = read_ply(cloud_path)
         cloud = np.vstack((cloud_ply['x'], cloud_ply['y'], cloud_ply['z'])).T
-
+        
         # YOUR CODE
+        query = cloud[:,:]
+        vert, lin, plan, spher = compute_features(query, cloud, 1)
+        write_ply('../results/features.ply',[query,features],['x', 'y', 'z', 'vert', 'lin', 'plan', 'spher'])
