@@ -87,7 +87,7 @@ def compute_features(query_points, cloud_points, radius):
     normals = eigves[:,0,:]
     vert_unit = np.array([[0,0,1]])
 
-    verticality = 2*np.arcsin(np.abs(normals@vert_unit))/np.pi
+    verticality = 2*np.arcsin(np.abs(normals@vert_unit.T))/np.pi
     linearity = -1*(lbd2/lbd1) + 1
     planarity = (lbd2 - lbd3) / lbd1
     sphericity = lbd3 / lbd1
