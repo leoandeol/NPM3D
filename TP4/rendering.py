@@ -23,9 +23,10 @@ class LightSource(object):
         self.int = it
         
 def shade(normalImage, material, lightSource):
-    image = (lightSource.rgb.reshape((1,1,-1))*lightSource.int)*material.fd.reshape((1,1,-1))*(normalImage@lightSource.coord.reshape((-1,1,1)))
-    flatimage = normalImage
+    flatimage = normalImage.reshape((-1,3))
+    image= material.fd[None,:] * flatImage@lightSource.coord[:,None] @ lightSource.rgb[None,:] * lightSource.int
     image /= np.max(image)
+    image = image.reshape(normalImage.shape)
     return image # skrattar du forlorar du
             
         
