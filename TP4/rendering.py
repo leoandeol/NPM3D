@@ -24,11 +24,12 @@ class LightSource(object):
         self.rgb = np.array([r,g,b])
         self.int = it
         
-def shade(normalImage, materials, lightSources):
-    for lightSource in lightSources:
-        for material in materials:
+def shade(normalImage, material, lightSource):
+    normalImage = normalImage[:,:,:3]
+    image = self.rgb.reshape(1,1,-1)*material.fd*(normalImage*lightSource.coord)
+    return image # skrattar du forlorar du
             
         
 if __name__ == "__main__":
     mat = Material()
-    ls= LightSource(0,1,1,0,255,0,1)
+    ls = LightSource(0,1,1,0,255,0,1)
