@@ -167,5 +167,5 @@ if __name__ == '__main__':
         query = cloud[:,:]
         np.random.shuffle(query)
         query = query[:200,:]
-        vert, lin, plan, spher = compute_features(query, cloud, 1)
-        write_ply('../results/features.ply',[query,features],['x', 'y', 'z', 'vert', 'lin', 'plan', 'spher'])
+        vert, lin, plan, spher = compute_features(cloud, cloud, 1)
+        write_ply('../results/features.ply',[cloud,vert,lin,plan,spher],['x', 'y', 'z', 'vert', 'lin', 'plan', 'spher'])
