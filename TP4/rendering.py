@@ -11,5 +11,8 @@ kd = 1
 
 print(normal_np.shape)
 
-def Material_model(image):
-    return 0
+class Material(object):
+
+    def __init__(self):
+        self.albedo = np.array([0,255,0])
+        self.kd
