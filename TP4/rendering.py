@@ -6,6 +6,7 @@ from PIL import Image
 normal = Image.open("normal.png")
 normal_np = np.array(normal)
 normal_np = normal_np[:,:,:3]
+normal_np = normal_np/255
 
 class Material(object):
 
@@ -26,7 +27,6 @@ def shade(normalImage, brdf, lightSource):
     flatImage = normalImage.reshape((-1,3))
     li = lightSource.rgb[None,:] * lightSource.int
     image = li * brdf * (flatImage @ lightSource.coord[:,None])
-    image /= np.max(image)
     image = image.reshape(normalImage.shape)
     return image # skrattar du forlorar du
 
@@ -46,9 +46,9 @@ if __name__ == "__main__":
     spec = 1
     shin = 1
     
-    x = 0
-    y = 3
-    z = -1
+    x = -10
+    y = 0
+    z = 0
     
     r = 1.
     g = 1.
@@ -61,15 +61,20 @@ if __name__ == "__main__":
     
     mat = Material(albedo,kd,spec,shin,wi,wo)    
     ls = LightSource(wi,r,g,b,it)
+    ls2 = LightSource(np.array([0,-1,0]),r,g,b,it)
 
-    lambert = lambert(mat.kd,mat.albedo)
-    #blinn_phong = blinn_phong(mat,normal_np,wi,wo)
+    lamb = lambert(mat.kd,mat.albedo)
+    blinn = blinn_phong(mat,normal_np,ls.coord,wo)
+    brdf = lamb * blinn
 
-    brdf = lambert # * blinn_phong
+    image = shade(normal_np,brdf,ls)/2
+
+    lamb = lambert(mat.kd,mat.albedo)
+    blinn = blinn_phong(mat,normal_np,ls2.coord,wo)
+    brdf = lamb * blinn
     
-    print(brdf.shape)
-    
-    image = shade(normal_np,brdf,ls)
+    image += shade(normal_np,brdf,ls2)/2
+
     print(np.max(image))
     plt.imshow(image)
     plt.show()
