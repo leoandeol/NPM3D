@@ -6,9 +6,6 @@ from PIL import Image
 normal = Image.open("normal.png")
 normal_np = np.array(normal)
 
-
-print(normal_np.shape)
-
 class Material(object):
 
     def __init__(self):
@@ -24,9 +21,9 @@ class LightSource(object):
         self.rgb = np.array([r,g,b])
         self.int = it
         
-def shade(normalImage, materials, lightSources):
-    for lightSource in lightSources:
-        for material in materials:
+def shade(normalImage, material, lightSource):
+    # We suppose there is a unique Litesource
+    return 0
             
         
 if __name__ == "__main__":
