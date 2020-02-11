@@ -6,8 +6,8 @@ from PIL import Image
 normal = Image.open("normal.png")
 normal_np = np.array(normal)
 normal_np = normal_np[:,:,:3]
-normal_np = normal_np/255
-print(np.max(normal_np))
+normal_np = normal_np / 128
+normal_np = normal_np -1
 
 class Material(object):
 
@@ -24,7 +24,8 @@ class Material(object):
         wh = (wi+wo)/np.linalg.norm(wi+wo)
         wh = wh[None,:]
         flatImage = normal.reshape((-1,3))
-        brdf = self.specular * ((flatImage @ wh.T) ** self.shininess)
+        shininess_mat = (flatImage @ wh.T) ** self.shininess
+        brdf = shininess_mat @ self.specular
         return brdf
 
 class LightSource(object):
@@ -45,26 +46,31 @@ def shade(normals, material, brdf_s, lightSources, wo):
             brdf = material.get_lambert()
         elif brdf_s == "blinn_phong":
             brdf = material.get_blinn_phong(normals, source.coord, wo)
-        else :
+        elif brdf_s == "all" :
             brdf = material.get_lambert() + material.get_blinn_phong(normals, source.coord, wo)
         li = source.get_li()[None,:]
-        image += (li * brdf * (flatImage @ source.coord[:,None])).clip(0,1)
+        print(brdf.shape)
+        image += (li * brdf * (flatImage @ source.coord[:,None]))
     #image /= len(lightSources)
+    print(np.min(image))
+    print(np.max(image))
     image = image.reshape(normals.shape)
     return image # skrattar du forlorar du
         
 if __name__ == "__main__":
     albedo = np.array([.75,0.9,0.6])
     kd = 1
-    spec = 1
-    shin = 1
-    
+    spec = np.array([[0.8, 0.7, 0.5]])
+    shin = 4
     mat = Material(albedo,kd,spec,shin)
+
+    wi_1 = np.array([1,3,1])
+    wi_1 = wi_1 / np.linalg.norm(wi_1)
+
     sources = [
-        LightSource(np.array([1,0.5,-1]),np.array([1.,0.,0.]),1.),
-        LightSource(np.array([-1,3,1]),np.array([0.,0.,1.]),1.)
+        LightSource(wi_1,np.array([1.,1.,0.5]),1.),
     ]
 
-    image = shade(normal_np, mat, "lambert", sources, [0,0,0])
+    image = shade(normal_np, mat, "blinn_phong", sources, [1.,1.,1.])
     plt.imshow(image)
     plt.show()
