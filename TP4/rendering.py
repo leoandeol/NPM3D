@@ -27,6 +27,18 @@ class Material(object):
         shininess_mat = (flatImage @ wh.T) ** self.shininess
         brdf = shininess_mat @ self.specular
         return brdf
+        
+    def get_cook_torrance(self, normal, wi, wo, alpha, F0, roughness):
+        wh = (wi+wo)/np.linalg.norm(wi+wo)
+        wh = wh[None,:]
+        denom = 4 * (normal @ wi.T ) * ( normal @ wo.T )
+        D = alpha**2 / (np.pi*((normal @ wh.T)**2)*(alpha**2-1)+1)
+        F = F0 + (1-F0)*np.pow(2,(-5.55473*(wi@wh.T)-6.98316)*(wi @ wh))
+        k = (roughness+1)**2 / 8 
+        G1 = lambda v: (normal@v.T)/((normal@v.T)*(1-k)+k)
+        G = G1(wi) * G1(wo)
+        return (D * F * G)/denom
+        
 
 class LightSource(object):
     
