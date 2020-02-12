@@ -46,14 +46,8 @@ class Material(object):
         F = self.F0 + (1-self.F0)*np.power(2, (-5.55473*(wo @ wh.T)-6.98346)*(wo @ wh.T))
         denom = denom[:,None]
 
-        #print(D.shape)
-        #print(F.shape)
-        #print(G.shape)
-        #print(denom.shape)
-
         res = (D * F * G)/denom
         res[np.hstack((denom==0) for _ in range(3))]=0
-        print("res" , res.shape)
         return res
         
 
@@ -68,7 +62,6 @@ class LightSource(object):
         return self.rgb * self.it
         
 def shade(normals, material, brdf_s, lightSources, wo):
-    print(normals.shape)
     flatNormals = normals.reshape((-1,3))
     image = np.zeros(flatNormals.shape);
     for source in lightSources:
@@ -78,47 +71,51 @@ def shade(normals, material, brdf_s, lightSources, wo):
             brdf = material.get_lambert() + material.get_blinn_phong(flatNormals, source.coord, wo)
         elif brdf_s == "cook":
             brdf = material.get_cook_torrance(flatNormals, source.coord, wo)
-        elif brdf_s == "all" :
-            brdf = material.get_lambert() + material.get_blinn_phong(normals, source.coord, wo)
         li = source.get_li()[None,:]
-        print("brdf",brdf.shape)
-        print("li",li.shape)
         image += ((flatNormals @ source.coord[:,None]) * brdf * li).clip(0,1)
-    print(np.min(image))
-    print(np.max(image))
+    image = image.clip(0,1)
     image = image.reshape(normals.shape)
     return image # skrattar du forlorar du
         
 if __name__ == "__main__":
+    # Lambert params
     albedo = np.array([.75,0.9,0.6])
-    kd = 0.9
-    
-    shin = 0.1
-    spec = 0.9
-    #spec = np.array([[0.75, 0.9, 0.6]])
-    
+    kd = 0.1
 
-    micro_facet_type = "iron"
+    # Blinn_phong params
+    shin = 0.9
+    spec = np.array([.75, .9, .6])    
+
+    # Micro facet params
+    micro_facet_type = "gold"
     if micro_facet_type == "iron":
-        F0 = np.array([[0.77, 0.78, 0.78]])
-    elif micro_facet_type == "water":
-        F0 = np.array([[0.15, 0.15, 0.15]])
+        F0 = np.array([[0.56, 0.57, 0.58]])
     elif micro_facet_type == "gold":
-        F0 = np.array([[1., 0.86, 0.57]])
-    elif micro_facet_type == "Plastic":
-        F0 = np.array([[0.24, 0.24, 0.24]])
-    
-    alpha = 0.2
-        
+        F0 = np.array([[0.7, 0.4, 0.]])
+
+    alpha = 0.9
+    # Material
     mat = Material(albedo,kd,spec,shin,alpha,F0)
-    
+
+    # LightSources
     wi_1 = np.array([0,1,1])
     wi_1 = wi_1 / np.linalg.norm(wi_1)
 
+    wi_2 = np.array([0,0,1])
+    wi_2 = wi_2 / np.linalg.norm(wi_2)
+
+    lightSource_color = np.array([1,1,1])
+    lightSource_intensity = 1
+
     sources = [
-        LightSource(wi_1,np.array([1.,1.,1.]),5),
+        LightSource(wi_1,
+                    lightSource_color,
+                    lightSource_intensity),
+        LightSource(wi_2,
+                    lightSource_color,
+                    lightSource_intensity)
     ]
 
-    image = shade(normal_np, mat, "cook", sources, np.array([1.,1.,1.]))
+    image = shade(normal_np, mat, "cook", sources, np.array([0,1,1]))
     plt.imshow(image)
     plt.show()
