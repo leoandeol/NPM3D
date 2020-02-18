@@ -27,8 +27,7 @@ class Material(object):
         wh = (wi+wo)/np.linalg.norm(wi+wo)
         wh = wh[None,:]
         shininess_mat = (normal @ wh.T) ** self.shininess
-        brdf = self.specular * shininess_mat
-        #brdf = shininess_mat @ self.specular
+        brdf = shininess_mat * self.specular
         return brdf
         
     def get_cook_torrance(self, normal, wi, wo):
@@ -70,7 +69,7 @@ def shade(normals, material, brdf_s, lightSources, wo):
         elif brdf_s == "blinn_phong":
             brdf = material.get_lambert() + material.get_blinn_phong(flatNormals, source.coord, wo)
         elif brdf_s == "cook":
-            brdf = material.get_cook_torrance(flatNormals, source.coord, wo)
+            brdf = material.get_lambert() + material.get_cook_torrance(flatNormals, source.coord, wo)
         li = source.get_li()[None,:]
         image += ((flatNormals @ source.coord[:,None]) * brdf * li).clip(0,1)
     image = image.clip(0,1)
@@ -79,12 +78,12 @@ def shade(normals, material, brdf_s, lightSources, wo):
         
 if __name__ == "__main__":
     # Lambert params
-    albedo = np.array([.75,0.9,0.6])
-    kd = 0.1
+    albedo = np.array([.9,0.9,0.9])
+    kd = 0.8
 
     # Blinn_phong params
-    shin = 0.9
-    spec = np.array([.75, .9, .6])    
+    shin = 0.1
+    spec = 0.5
 
     # Micro facet params
     micro_facet_type = "gold"
@@ -93,7 +92,7 @@ if __name__ == "__main__":
     elif micro_facet_type == "gold":
         F0 = np.array([[0.7, 0.4, 0.]])
 
-    alpha = 0.9
+    alpha = 0.7
     # Material
     mat = Material(albedo,kd,spec,shin,alpha,F0)
 
@@ -109,10 +108,10 @@ if __name__ == "__main__":
 
     sources = [
         LightSource(wi_1,
-                    lightSource_color,
+                    np.array([1,0,0]),
                     lightSource_intensity),
         LightSource(wi_2,
-                    lightSource_color,
+                    np.array([1,1,1]),
                     lightSource_intensity)
     ]
 

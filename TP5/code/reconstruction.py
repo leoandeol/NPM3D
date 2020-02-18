@@ -25,14 +25,24 @@ from utils.ply import write_ply, read_ply
 import time
 
 from skimage import measure
+from tqdm import tqdm
 
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 
 # Hoppe surface reconstruction
 def compute_hoppe(points,normals,volume,number_cells,min_grid,length_cell):
-    return
+    tree = KDTree(points, leaf_size=2)
 
+    for x in range(volume.shape[0]):
+        for y in range(volume.shape[1]):
+            for z in range(volume.shape[2]):
+                point = np.array([min_grid[0]+(x*length_cell[0]), min_grid[1]+(y*length_cell[1]), min_grid[2]+(z*length_cell[2])])
+                point = point[None,:]
+                _ , neighbor_ind = tree.query(point, k=1)
+                volume[x,y,z] = normals[neighbor_ind][0][0] @ ( point[0] - points[neighbor_ind][0][0])
+    
+    return volume
 				
 # EIMLS surface reconstruction
 def compute_eimls(points,normals,volume,number_cells,min_grid,length_cell):
@@ -44,7 +54,8 @@ if __name__ == '__main__':
 
     # Path of the file
     file_path = '../data/sphere_normals.ply'
-
+    #file_path = '../data/bunny_normals.ply'
+    
     # Load point cloud
     data = read_ply(file_path)
 
