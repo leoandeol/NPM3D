@@ -40,9 +40,11 @@ def compute_hoppe(points,normals,volume,number_cells,min_grid,length_cell):
                 point = np.array([min_grid[0]+(x*length_cell[0]), min_grid[1]+(y*length_cell[1]), min_grid[2]+(z*length_cell[2])])
                 point = point[None,:]
                 _ , neighbor_ind = tree.query(point, k=1)
-                volume[x,y,z] = normals[neighbor_ind][0][0] @ ( point[0] - points[neighbor_ind][0][0])
-    
-    return volume
+                normal_ = np.asarray(normals[neighbor_ind][0][0])
+                point_ = np.asarray(point[0])
+                x_ = np.asarray(points[neighbor_ind][0][0])
+                volume[x,y,z] = normal_ @ (point_ - x_) 
+
 				
 # EIMLS surface reconstruction
 def compute_eimls(points,normals,volume,number_cells,min_grid,length_cell):
@@ -53,8 +55,8 @@ def compute_eimls(points,normals,volume,number_cells,min_grid,length_cell):
 if __name__ == '__main__':
 
     # Path of the file
-    file_path = '../data/sphere_normals.ply'
-    #file_path = '../data/bunny_normals.ply'
+    #file_path = '../data/sphere_normals.ply'
+    file_path = '../data/bunny_normals.ply'
     
     # Load point cloud
     data = read_ply(file_path)
